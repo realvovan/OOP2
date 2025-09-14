@@ -48,9 +48,11 @@ Select an action:
 						int passportNum = int.Parse(Console.ReadLine() ?? "0");
 						Console.WriteLine("Enter student id number (XX12345678)");
 						string studentId = Console.ReadLine() ?? "";
+						Console.WriteLine("Enter the year/grade");
+						int year = int.Parse(Console.ReadLine() ?? "1");
 						Console.WriteLine("Is sports their hobby (Y/N)");
 						bool isSportsAHobby = Console.ReadLine()?.ToLower() == "y";
-						people = [..people,new Student(first,last,passportNum,studentId,isSportsAHobby)];
+						people = [..people,new Student(first,last,passportNum,studentId,year,isSportsAHobby)];
 					} catch (Exception e) {
 						Console.WriteLine($"An error occured while adding a student: {e.Message}");
 						return;
@@ -218,9 +220,9 @@ Select an action:
 			} },
 			{ "10", () => {
 				Person[] toAdd = [
-					new Student("Vova","Hordiienko",12345678,"KB87654321",true) {Year = 2},
-					new Student("Dima","Lisovyy",22444466,"AK12344321",false) {Year = 2},
-					new Student("Lida","Petrenko",6533221,"BK42231200",true),
+					new Student("Vova","Hordiienko",12345678,"KB87654321",2,true),
+					new Student("Dima","Lisovyy",22444466,"AK12344321",2,false),
+					new Student("Lida","Petrenko",6533221,"BK42231200",1,true),
 					new Fireman("Ivan","Pavlenko",6769420),
 					new Fireman("Pavel","Melikabyan",5432134,4),
 					new Courier("John","Doe",12342335,10)

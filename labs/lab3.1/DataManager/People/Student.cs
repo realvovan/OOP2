@@ -7,7 +7,8 @@ public class Student : Person {
 	public string StudentId { get; init; }
 	public bool IsSportsAHobby { get; set; }
 
-	public Student(string first,string last,int passportNumber,string studentId,bool isSportsAHobby) : base(first,last,passportNumber) {
+	public Student(string first,string last,int passportNumber,string studentId,int year,bool isSportsAHobby) : base(first,last,passportNumber) {
+		this.Year = year;
 		this.IsSportsAHobby = isSportsAHobby;
 		this.StudentId =
 			Regex.IsMatch(studentId,"^[A-Z]{2}[0-9]{8}$")
