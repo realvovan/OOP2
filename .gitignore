@@ -3,4 +3,7 @@
 .editorconfig
 obj
 bin
+TestResults
+coveragereport
 *.txt
+*.json
