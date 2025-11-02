@@ -2,7 +2,13 @@
 
 namespace Coursework.DataLevel.Entities;
 
+/// <summary>
+/// Class which represents a realtor client
+/// </summary>
 public class Client {
+	/// <summary>
+	/// Maximum number of real estate suggestions, that can be added to a single client
+	/// </summary>
 	public const int MAX_SUGGESTIONS = 5;
 
 	private string firstName = "";
@@ -96,8 +102,8 @@ public class Client {
 		this.DesiredRoomCount = desiredRoomCount;
 		this.PhotoFilePath = photoPath;
 		this.SuggestedRealEstates = new List<Guid>();
-		for (int i = 0; i < MAX_SUGGESTIONS; i++) {
-			this.SuggestedRealEstates[i] = suggestedRealEstates[i];
+		for (int i = 0; i < MAX_SUGGESTIONS && i < suggestedRealEstates.Count; i++) {
+			this.SuggestedRealEstates.Add(suggestedRealEstates[i]);
 		}
 		this.CreatedAt = DateTime.Now;
 	}

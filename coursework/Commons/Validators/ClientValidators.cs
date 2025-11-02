@@ -5,7 +5,7 @@ namespace Coursework.Commons.Validators;
 public static class ClientValidator {
 	private static readonly Regex nameRegex = new Regex("^[A-ZА-ЯЇІЄҐa-zа-яїієґ'’]+$",RegexOptions.Compiled);
 	private static readonly Regex emailRegex = new Regex(@"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$",RegexOptions.Compiled);
-	private static readonly Regex ibanRegex = new Regex(@"^[A-Z]{2}\d{29}$",RegexOptions.Compiled);
+	private static readonly Regex ibanRegex = new Regex(@"^[A-Z]{2}\d+$",RegexOptions.Compiled);
 	private static readonly Regex phoneRegex = new Regex(@"^\+?\d{7,15}$",RegexOptions.Compiled);
 	private static readonly Regex passportRegex = new Regex(@"^(?:\d{9}|[A-Z]{2}\d{6})$",RegexOptions.Compiled);
 	public static bool ValidateName(string? name) => !string.IsNullOrWhiteSpace(name) && nameRegex.IsMatch(name);

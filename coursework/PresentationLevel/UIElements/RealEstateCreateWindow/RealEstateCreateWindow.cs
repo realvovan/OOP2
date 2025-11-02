@@ -7,6 +7,9 @@ using Coursework.Commons.Enums;
 
 namespace Coursework.PresentationLevel;
 
+/// <summary>
+/// Window allows to create or edit an existing real estate object
+/// </summary>
 public partial class RealEstateCreateWindow : Form {
 	string photoPath = string.Empty;
 	CreateWindowOpenModes mode;

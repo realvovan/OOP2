@@ -3,7 +3,24 @@ using Coursework.DataLevel.Entities;
 
 namespace Coursework.BusinessLevel.Services;
 
+/// <summary>
+/// Service for working with realtor clients
+/// </summary>
 public sealed class ClientService : BaseEntityService<Client,ClientDTO> {
+	/// <summary>
+	/// Maximum number of real estate suggestions, that can be added to a single client
+	/// </summary>
+	public const int MAX_SUGGESTIONS = Client.MAX_SUGGESTIONS; // exists for PresentationLevel
+	/// <summary>
+	/// Attempts to add a real estate suggestion to a client with a given Guid and returns whether it was successful
+	/// </summary>
+	/// <param name="clientGuid">Client's Guid</param>
+	/// <param name="objectGuid">Real estate's Guid</param>
+	/// <param name="reService"><see cref="RealEstateService"/> which validates <paramref name="objectGuid"/></param>
+	/// <returns>
+	/// A failed result is returned if a client or real estate with a provided Guid does not exist
+	/// or if the client has too many suggestions
+	/// </returns>
 	public Result AddSuggestion(Guid clientGuid,Guid objectGuid,RealEstateService reService) {
 		if (!this.entities.TryGetValue(clientGuid,out var client)) return Result.Fail("Client with given Guid does not exist");
 		if (!reService.EntityExists(objectGuid)) return Result.Fail("Real estate with given Guid does not exist");
@@ -14,81 +31,39 @@ public sealed class ClientService : BaseEntityService<Client,ClientDTO> {
 		}
 		return Result.Successful;
 	}
+	/// <summary>
+	/// Attempts to remove a real estate suggestion for a client and returns the success of the operation
+	/// </summary>
+	/// <param name="clientGuid">Client's Guid</param>
+	/// <param name="objectGuid">Suggested real estate's Guid</param>
+	/// <returns>
+	/// A failed result is returned if a client with a provided Guid does not exist
+	/// or a real estate with a provided Guid is not present in the suggestions list of the client
+	/// </returns>
 	public Result RemoveSuggestion(Guid clientGuid,Guid objectGuid) {
 		if (!this.entities.TryGetValue(clientGuid,out var client)) return Result.Fail("Client with given Guid does not exist");
 		bool result = client.RemoveSuggestion(objectGuid);
 		return result ? Result.Successful : Result.Fail("Could not find object with a given Guid");
 	}
+	/// <summary>
+	/// Returns the number real estate suggestion a client with a given Guid has.
+	/// Returns -1 if a client with that Guid cannot be found
+	/// </summary>
+	/// <param name="clientGuid">Client's Guid</param>
+	public int GetNumberOfSuggestions(Guid clientGuid) {
+		if (!this.entities.TryGetValue(clientGuid,out var client)) return -1;
+		return client.SuggestedRealEstates.Count;
+	}
+	/// <summary>
+	/// Creates a <see cref="ClientService"/> with no clients
+	/// </summary>
 	public ClientService() : base(ClientDTO.FromClient) { }
+	/// <summary>
+	/// Creates a <see cref="ClientService"/> with given entities
+	/// </summary>
 	public ClientService(Dictionary<Guid,Client> clients) : base(clients,ClientDTO.FromClient) { }
+	/// <summary>
+	/// Creates <see cref="ClientService"/> with entities from given DTOs
+	/// </summary>
 	public ClientService(Dictionary<Guid,ClientDTO> clients) : base(clients,ClientDTO.FromClient) { }
 }
-
-//public class ClientService {
-//	public const int MAX_SUGGESTIONS = Client.MAX_SUGGESTIONS;
-
-//	private Dictionary<Guid,Client> clients;
-
-//	public void AddClient(ClientDTO client) => this.clients[Guid.NewGuid()] = client.ToEntity();
-//	public bool RemoveClient(Guid clientGuid) => this.clients.Remove(clientGuid);
-//	public Result AddSuggestion(Guid clientGuid,Guid objectGuid) {
-//		if (!this.clients.TryGetValue(clientGuid,out var client)) return Result.Fail("Client with given Guid does not exist");
-//		if (client.SuggestedRealEstates.Count > MAX_SUGGESTIONS) return Result.Fail($"Cannot add more that {MAX_SUGGESTIONS} suggestions");
-//		if (client.SuggestedRealEstates.Contains(objectGuid)) return Result.Fail("Real estate already added to suggestions");
-//		//also check if real estate exists
-//		client.SuggestedRealEstates.Add(objectGuid);
-//		return Result.Successful;
-//	}
-//	public Result RemoveSuggestion(Guid clientGuid,Guid objectGuid) {
-//		if (!this.clients.TryGetValue(clientGuid,out var client)) return Result.Fail("Client with given Guid does not exist");
-//		bool result = client.SuggestedRealEstates.Remove(objectGuid);
-//		return result ? Result.Successful : Result.Fail("Could not find object with a given Guid");
-//	}
-//	public Result EditClient(ClientDTO newClientInfo) {
-//		if (newClientInfo.Guid == null || !this.clients.ContainsKey(newClientInfo.Guid.Value))
-//			return Result.Fail("Client with given Guid does not exist");
-//		this.clients[newClientInfo.Guid.Value] = newClientInfo.ToEntity();
-//		return Result.Successful;
-//	}
-//	public ClientDTO? GetClientInfo(Guid guid) {
-//		if (this.clients.TryGetValue(guid,out var client)) return ClientDTO.FromClient(client,guid);
-//		return null;
-//	}
-//	public ClientDTO[] GetAllClients() {
-//		return this.clients
-//			.Select(kv => ClientDTO.FromClient(kv.Value,kv.Key))
-//			.ToArray();
-//	}
-//	public ClientDTO[] GetSortedBy<T>(Func<ClientDTO,T> sortingFunc) {
-//		return this.clients
-//			.Select(kv => ClientDTO.FromClient(kv.Value,kv.Key))
-//			.OrderBy(sortingFunc)
-//			.ToArray();
-//	}
-//	public ClientDTO[] GetDescendingSortedBy<T>(Func<ClientDTO,T> sortingFunc) {
-//		return this.clients
-//			.Select(kv => ClientDTO.FromClient(kv.Value,kv.Key))
-//			.OrderByDescending(sortingFunc)
-//			.ToArray();
-//	}
-//	public ClientDTO[] SearchBy(Func<ClientDTO,bool> searchFunc) {
-//		return this.clients
-//			.Select(kv => ClientDTO.FromClient(kv.Value,kv.Key))
-//			.Where(searchFunc)
-//			.ToArray();
-//	}
-
-//	public ClientService() {
-//		this.clients = new Dictionary<Guid,Client>();
-//	}
-//	public ClientService(Dictionary<Guid,Client> clients) {
-//		this.clients = clients;
-//	}
-//	public ClientService(Dictionary<Guid,ClientDTO> clients) {
-//		var dict = new Dictionary<Guid,Client>(clients.Count);
-//		foreach (var kv in clients) {
-//			dict[kv.Key] = kv.Value.ToEntity();
-//		}
-//		this.clients = dict;
-//	}
-//}

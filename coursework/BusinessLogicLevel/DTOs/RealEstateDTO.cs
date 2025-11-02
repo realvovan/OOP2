@@ -27,9 +27,12 @@ public class RealEstateDTO(
 	public byte RoomCount { get; set; } = roomCount;
 	public string PhotoFilePath { get; set; } = photoPath;
 	public RealEstateType Type { get; set; } = type;
-	public DateTime? CreatedAt { get; set; } = createdAt;
-	public Guid? Guid { get; set; } = guid;
+	public DateTime? CreatedAt { get; init; } = createdAt;
+	public Guid? Guid { get; init; } = guid;
 
+	/// <summary>
+	/// Converts the DTO to <see cref="RealEstate"/>
+	/// </summary>
 	public RealEstate ToEntity() => new RealEstate(
 		Country,
 		Provice,
@@ -47,6 +50,11 @@ public class RealEstateDTO(
 
 	public override string ToString() => $"{this.Country}, {this.City}, {this.Street}, {this.HouseNumber}, (zip: {this.Zip})";
 
+	/// <summary>
+	/// Creates a new <see cref="RealEstateDTO"/> from a provided real estate object
+	/// </summary>
+	/// <param name="realEstate">Real estate which will converted to the DTO</param>
+	/// <param name="guid">Optional Guid, if the real estate has it</param>
 	public static RealEstateDTO FromRealEstate(RealEstate realEstate,Guid? guid = null) => new RealEstateDTO(
 		realEstate.Country,
 		realEstate.Province,

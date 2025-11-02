@@ -3,6 +3,9 @@ using Coursework.Commons.Enums;
 
 namespace Coursework.DataLevel.Entities;
 
+/// <summary>
+/// Class which represents a real estate object
+/// </summary>
 public class RealEstate {
 	private string country = "";
 	private string province = "";

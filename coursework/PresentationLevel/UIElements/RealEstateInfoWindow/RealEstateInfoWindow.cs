@@ -3,15 +3,19 @@ using Coursework.PresentationLevel.Values;
 
 namespace Coursework.PresentationLevel;
 
+/// <summary>
+/// Window allows to view full info about a real estate object with a set <see cref="objectGuid"/> and to open the editing window
+/// </summary>
 public partial class RealEstateInfoWindow : Form {
 	RealEstateService service;
 	Guid objectGuid;
-	public RealEstateInfoWindow(RealEstateService service,Guid guid) {
+	public RealEstateInfoWindow(RealEstateService service,Guid guid,bool allowEdit = true) {
 		InitializeComponent();
 		this.service = service;
 		this.objectGuid = guid;
 		this.CancelButton = this.DoneButton;
 		this.AcceptButton = this.DoneButton;
+		this.EditButton.Enabled = allowEdit;
 
 		var entity = service.GetEntityInfo(objectGuid);
 		if (entity == null) {
@@ -30,7 +34,7 @@ public partial class RealEstateInfoWindow : Form {
 		this.StreetLabel.Text = entity.Street;
 		this.HouseNumLabel.Text = entity.HouseNumber;
 		this.ZipLabel.Text = entity.Zip;
-		this.PriceLabel.Text = entity.Price.ToString();
+		this.PriceLabel.Text = entity.Price.ToString() + '$';
 		this.RoomCountLabel.Text = entity.RoomCount.ToString();
 		this.TypeLabel.Text = entity.Type.ToString();
 		this.CreatedOnLabel.Text = entity.CreatedAt?.ToString() ?? "N/A";
@@ -48,6 +52,7 @@ public partial class RealEstateInfoWindow : Form {
 		this.Close();
 	}
 	void EditButton_Click(object sender,EventArgs e) {
+		if (!this.EditButton.Enabled) return;
 		using var editWin = new RealEstateCreateWindow(
 			CreateWindowOpenModes.Edit,
 			this.service,
