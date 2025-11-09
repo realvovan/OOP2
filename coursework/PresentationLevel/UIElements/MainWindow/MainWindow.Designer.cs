@@ -35,6 +35,8 @@ partial class MainWindow {
 		this.EstateView = new Button();
 		this.ClientsView = new Button();
 		this.panel2 = new Panel();
+		this.PriceToleranceBox = new TextBox();
+		this.PriceToleranceLabel = new Label();
 		this.SuggestionsFilterRequests = new CheckBox();
 		this.EditButton = new Button();
 		this.InfoButton = new Button();
@@ -242,6 +244,8 @@ partial class MainWindow {
 		// 
 		this.panel2.BackColor = SystemColors.Info;
 		this.panel2.BorderStyle = BorderStyle.FixedSingle;
+		this.panel2.Controls.Add(this.PriceToleranceBox);
+		this.panel2.Controls.Add(this.PriceToleranceLabel);
 		this.panel2.Controls.Add(this.SuggestionsFilterRequests);
 		this.panel2.Controls.Add(this.EditButton);
 		this.panel2.Controls.Add(this.InfoButton);
@@ -252,6 +256,26 @@ partial class MainWindow {
 		this.panel2.Name = "panel2";
 		this.panel2.Size = new Size(230,421);
 		this.panel2.TabIndex = 1;
+		// 
+		// PriceToleranceBox
+		// 
+		this.PriceToleranceBox.Location = new Point(117,364);
+		this.PriceToleranceBox.Name = "PriceToleranceBox";
+		this.PriceToleranceBox.Size = new Size(104,23);
+		this.PriceToleranceBox.TabIndex = 12;
+		this.PriceToleranceBox.Visible = false;
+		this.PriceToleranceBox.KeyDown += this.PriceToleranceBox_KeyDown;
+		// 
+		// PriceToleranceLabel
+		// 
+		this.PriceToleranceLabel.BackColor = Color.FromArgb(214,214,189);
+		this.PriceToleranceLabel.Font = new Font("Segoe UI",11F);
+		this.PriceToleranceLabel.Location = new Point(10,363);
+		this.PriceToleranceLabel.Name = "PriceToleranceLabel";
+		this.PriceToleranceLabel.Size = new Size(110,24);
+		this.PriceToleranceLabel.TabIndex = 11;
+		this.PriceToleranceLabel.Text = "Price tolerance:";
+		this.PriceToleranceLabel.Visible = false;
 		// 
 		// SuggestionsFilterRequests
 		// 
@@ -937,6 +961,7 @@ partial class MainWindow {
 		this.panel1.ResumeLayout(false);
 		this.panel1.PerformLayout();
 		this.panel2.ResumeLayout(false);
+		this.panel2.PerformLayout();
 		this.EstateSortList.ResumeLayout(false);
 		this.EstateSortList.PerformLayout();
 		this.EstateSortOptions.ResumeLayout(false);
@@ -1032,4 +1057,6 @@ partial class MainWindow {
 	private RadioButton CombinedSortType;
 	private RadioButton CombinedSortName;
 	private CheckBox SuggestionsFilterRequests;
+	private Label PriceToleranceLabel;
+	private TextBox PriceToleranceBox;
 }

@@ -106,6 +106,8 @@ public partial class MainWindow : Form {
 		this.SuggestionsFilterRequests.Enabled = this.viewMode == ViewMode.Suggestions;
 		this.SuggestionsFilterRequests.Visible = this.SuggestionsFilterRequests.Enabled;
 		this.SuggestionsFilterRequests.Checked = false;
+		this.PriceToleranceBox.Visible = this.SuggestionsFilterRequests.Visible;
+		this.PriceToleranceLabel.Visible = this.SuggestionsFilterRequests.Visible;
 	}
 	void hideSortingLists() {
 		this.EstateSortList.Visible = false;
@@ -142,9 +144,8 @@ public partial class MainWindow : Form {
 					fitsRooms = fitsRooms && dto.DesiredRoomCount < roomsMax;
 				}
 				return fitsPrice && fitsRooms;
-			});
-			// searching by search bar values
-			result.SearchBy(dto => {
+			}).SearchBy(dto => {
+				// searching by search bar values
 				if (string.IsNullOrWhiteSpace(this.SearchBox.Text)) return true;
 				string[] searchFilter = this.SearchBox.Text.Split(' ');
 				Func<string,bool> contains = s => {
@@ -193,9 +194,10 @@ public partial class MainWindow : Form {
 				) {
 					// filter by client's request instead of search filters
 					var client = this.clientService.GetEntityInfo(this.suggestionModeClient.Value)!;
+					double tolerance = double.TryParse(this.PriceToleranceBox.Text,out double res) ? res : CLIENT_PRICE_TOLERANCE;
 					fitsPrice =
-						client.DesiredPrice >= dto.Price - CLIENT_PRICE_TOLERANCE
-						&& client.DesiredPrice < dto.Price + CLIENT_PRICE_TOLERANCE;
+						client.DesiredPrice >= dto.Price - tolerance
+						&& client.DesiredPrice < dto.Price + tolerance;
 					fitsRooms = client.DesiredRoomCount == dto.RoomCount;
 					return fitsPrice && fitsRooms;
 				}
@@ -212,9 +214,8 @@ public partial class MainWindow : Form {
 					fitsRooms = fitsRooms && dto.RoomCount < roomsMax;
 				}
 				return fitsPrice && fitsRooms;
-			});
-			// searching by search box inputs
-			result.SearchBy(dto => {
+			}).SearchBy(dto => {
+				// searching by search box inputs
 				if (string.IsNullOrWhiteSpace(this.SearchBox.Text)) return true;
 				string[] searchFilter = this.SearchBox.Text.Split(' ');
 				Func<string,bool> contains = s => {
@@ -495,6 +496,11 @@ public partial class MainWindow : Form {
 		// automatically update the list if you enter the third character or the input is cleared
 		// no automatic updates every for every key stroke to prevent too many queries
 		if (this.SearchBox.Text.Length == 0 || this.SearchBox.Text.Length == 3) {
+			displayEntityList();
+		}
+	}
+	void PriceToleranceBox_KeyDown(object sender,KeyEventArgs e) {
+		if (e.KeyCode == Keys.Enter) {
 			displayEntityList();
 		}
 	}

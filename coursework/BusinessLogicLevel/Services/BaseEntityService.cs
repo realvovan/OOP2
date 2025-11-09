@@ -23,7 +23,7 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to add a new entity to the service and returns whether it was added successfully
 	/// </summary>
 	/// <param name="entity">DTO of the entity to add</param>
-	public virtual Result AddEntity(T_DTO entity) {
+	public Result AddEntity(T_DTO entity) {
 		try {
 			this.entities[Guid.NewGuid()] = entity.ToEntity();
 			return Result.Successful;
@@ -35,7 +35,7 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to remove an entity from the service and returns whether it was removed successfully
 	/// </summary>
 	/// <param name="entityId">Guid of the entity to remove</param>
-	public virtual Result RemoveEntity(Guid entityId) {
+	public Result RemoveEntity(Guid entityId) {
 		bool result = this.entities.Remove(entityId);
 		return result ? Result.Successful : Result.Fail("Could not find entity with a given Guid");
 	}
@@ -43,7 +43,7 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to update an entity and returns whether it was edited successfully
 	/// </summary>
 	/// <param name="newEntity">DTO with new properties for the edited entity. <see cref="T_DTO.Guid"/> must be a non-null value</param>
-	public virtual Result UpdateEntity(T_DTO newEntity) {
+	public Result UpdateEntity(T_DTO newEntity) {
 		if (newEntity.Guid == null || !this.entities.ContainsKey(newEntity.Guid.Value))
 			return Result.Fail("Could not find entity with a given Guid");
 		try {
@@ -57,14 +57,14 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to save all entities to a file using <see cref="JsonProvider"/> and returns the success of the operation
 	/// </summary>
 	/// <param name="filePath">Path to the file to save entites to</param>
-	public virtual Result SaveEntitiesToFile(string filePath) {
+	public Result SaveEntitiesToFile(string filePath) {
 		return this.SaveEntitiesToFile(new JsonProvider(filePath));
 	}
 	/// <summary>
 	/// Attempts to save all entities using a given DataProvider and returns the success of the operation
 	/// </summary>
 	/// <param name="provider">DataProvider to serealize and save entities to the file</param>
-	public virtual Result SaveEntitiesToFile(IDataProvider provider) {
+	public Result SaveEntitiesToFile(IDataProvider provider) {
 		try {
 			provider.SaveToFile(this.entities);
 			return Result.Successful;
@@ -76,7 +76,7 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to load entities from a file using a given DataProvider and returns the success of the operation
 	/// </summary>
 	/// <param name="provider">DataProvider to deserealize entities</param>
-	public virtual Result LoadEntitiesFromFile(IDataProvider provider) {
+	public Result LoadEntitiesFromFile(IDataProvider provider) {
 		try {
 			var loaded = provider.LoadFromFile<Dictionary<Guid,T>>();
 			if (loaded == null) return Result.Fail("Provider returned null");
@@ -90,7 +90,7 @@ public class BaseEntityService<T,T_DTO> where T_DTO : IDTO<T> {
 	/// Attempts to load entities from a file using <see cref="JsonProvider"/> and returns the success of the operation
 	/// </summary>
 	/// <param name="filePath">Path to the file with entities</param>
-	public virtual Result LoadEntitiesFromFile(string filePath) {
+	public Result LoadEntitiesFromFile(string filePath) {
 		return this.LoadEntitiesFromFile(new JsonProvider(filePath));
 	}
 	/// <summary>

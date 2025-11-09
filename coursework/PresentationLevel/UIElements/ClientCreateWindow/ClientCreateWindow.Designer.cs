@@ -23,6 +23,7 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
+			this.components = new System.ComponentModel.Container();
 			this.Title = new Label();
 			this.PictureBox = new PictureBox();
 			this.FirstBox = new TextBox();
@@ -40,6 +41,7 @@
 			this.RemoveSuggestionButton = new Button();
 			this.OpenFileDialog = new OpenFileDialog();
 			this.SuggestionsLabel = new Label();
+			this.ToolTip = new ToolTip(this.components);
 			((System.ComponentModel.ISupportInitialize)this.PictureBox).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -112,6 +114,7 @@
 			this.PassportBox.PlaceholderText = "Passport number";
 			this.PassportBox.Size = new Size(200,29);
 			this.PassportBox.TabIndex = 8;
+			this.ToolTip.SetToolTip(this.PassportBox,"Fortmat: 123456789 or XX123456");
 			// 
 			// IbanBox
 			// 
@@ -257,5 +260,6 @@
 		private Button RemoveSuggestionButton;
 		private OpenFileDialog OpenFileDialog;
 		private Label SuggestionsLabel;
+		private ToolTip ToolTip;
 	}
 }
