@@ -11,6 +11,6 @@ public enum AnimalStates {
 	Living,
 	Habitat,
 }
-public class AnimalStateChangeArgs(AnimalStates stateChanged) : EventArgs {
-	public AnimalStates StateChanged { get; } = stateChanged;
+public class AnimalStateChangeArgs(AnimalStates changedState) : EventArgs {
+	public AnimalStates ChangedState { get; } = changedState;
 }

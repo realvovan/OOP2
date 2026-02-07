@@ -22,7 +22,7 @@ static class Demo2 {
 
 	static void onAnimalStateChange(object? sender,AnimalStateChangeArgs args) {
 		var animal = (Animal)sender!;
-		if (args.StateChanged == AnimalStates.Dying && animal.Habitat is not null) {
+		if (args.ChangedState == AnimalStates.Dying && animal.Habitat is not null) {
 			Console.WriteLine($"{animal.Name} died in {animal.Habitat.Name}");
 		}
 	}
@@ -75,20 +75,7 @@ Please select habitat action
 				Console.WriteLine("Selected habitat is full, please select anothe action");
 				return;
 			}
-			prompt = @"Please select animal type
-1. Dog
-2. Canary
-3. Lizard";
-			input = getValidInput(prompt,["1","2","3"]);
-			string animalName = getValidInput("Please enter animal name",_ => true);
-			if (input == "1") {
-				new Dog(animalName,selectedHabitat).StateChanged += onAnimalStateChange;
-			} else if (input == "2") {
-				new Canary(animalName,selectedHabitat).StateChanged += onAnimalStateChange;
-			} else if (input == "3") {
-				new Lizard(animalName,selectedHabitat).StateChanged += onAnimalStateChange;
-			}
-			Console.WriteLine("Successfully added animal!");
+			promptUserAnimalCreate(selectedHabitat);
 		} else if (input == "2") {
 			selectedHabitat.FeedAll();
 			Console.WriteLine("Fed all animals!");
@@ -247,7 +234,7 @@ Please select habitat action
 		}
 		promptBuilder.Append($"{i++}. Add new animal\n");
 		promptBuilder.Append($"{i}. Main menu");
-		string input = getValidInput(promptBuilder.ToString(),s => int.TryParse(s,out int n) && n >= 0 && n <= animals.Count + 2);
+		string input = getValidInput(promptBuilder.ToString(),s => int.TryParse(s,out int n) && n > 0 && n <= animals.Count + 2);
 		int n = int.Parse(input);
 		if (n == animals.Count + 1) {
 			string prompt = @"Please select the habitat:
@@ -265,27 +252,30 @@ Please select habitat action
 				Console.WriteLine("Selected habitat is full!");
 				return;
 			}
-			prompt = @"Please select animal type
+			promptUserAnimalCreate(habitat);
+		} else if (n >= animals.Count + 2) {
+			menuMode = menuModes.MainMenu;
+		} else { 
+			selectedAnimal = animals[n - 1];
+			menuMode = menuModes.AnimalMode;
+		}
+		animals.Clear();
+	}
+	static void promptUserAnimalCreate(Habitat habitat) {
+		string prompt = @"Please select animal type
 1. Dog
 2. Canary
 3. Lizard";
-			input = getValidInput(prompt,["1","2","3"]);
-			string animalName = getValidInput("Please enter animal name",_ => true);
-			if (input == "1") {
-				new Dog(animalName,habitat).StateChanged += onAnimalStateChange;
-			} else if (input == "2") {
-				new Canary(animalName,habitat).StateChanged += onAnimalStateChange;
-			} else if (input == "3") {
-				new Lizard(animalName,habitat).StateChanged += onAnimalStateChange;
-			}
-			Console.WriteLine("Successfully added animal!");
-			return;
+		string input = getValidInput(prompt,["1","2","3"]);
+		string animalName = getValidInput("Please enter animal name",_ => true).Trim();
+		if (input == "1") {
+			new Dog(animalName,habitat).StateChanged += onAnimalStateChange;
+		} else if (input == "2") {
+			new Canary(animalName,habitat).StateChanged += onAnimalStateChange;
+		} else if (input == "3") {
+			new Lizard(animalName,habitat).StateChanged += onAnimalStateChange;
 		}
-		if (n >= animals.Count + 2) {
-			menuMode = menuModes.MainMenu;
-			return;
-		}
-		throw new NotImplementedException();
+		Console.WriteLine("Successfully added animal!");
 	}
 	// Returns user input if it matches the predicate
 	static string getValidInput(string prompt,Predicate<string> validator) {

@@ -9,7 +9,7 @@ static class Demo1 {
 		var sharik = new Dog("Sharik",store);
 		sharik.StateChanged += (sender,args) => {
 			var dog = (Dog)sender!;
-			switch (args.StateChanged) {
+			switch (args.ChangedState) {
 				case AnimalStates.Eating:
 					Console.WriteLine($"{dog.Name} ate {dog.FeedCountToday} times today!");
 					break;
