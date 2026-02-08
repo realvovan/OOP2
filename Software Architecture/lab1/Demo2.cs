@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 
 namespace SoftwareArch.lab1;
 
@@ -12,7 +11,7 @@ static class Demo2 {
 		None
 	}
 
-	static readonly Person person = new("Person");
+	static readonly Person person = new("Owner");
 	static readonly AnimalStore store = new("PetShop");
 	static readonly Wilderness wild = new();
 	static menuModes menuMode = menuModes.MainMenu;
@@ -80,11 +79,11 @@ Please select habitat action
 			selectedHabitat.FeedAll();
 			Console.WriteLine("Fed all animals!");
 		} else if (input == "3") {
-			if (!selectedHabitat.HasCare) {
+			if (selectedHabitat is not ICaregiver caregiver) {
 				Console.WriteLine("This habitat does not support cleaning");
 				return;
 			}
-			selectedHabitat.CleanAll();
+			caregiver.CleanAll();
 			Console.WriteLine("Cleaned after animals");
 		} else if (input == "4") {
 			if (selectedHabitat.AnimalCount == 0) {
@@ -106,7 +105,7 @@ Please select habitat action
 			}
 		} else if (input == "6") {
 			Console.WriteLine("Advancing to next day");
-			selectedHabitat.AdvanceDay();
+			CalendarService.AdvanceDay(selectedHabitat);
 		} else if (input == "7") {
 			menuMode = menuModes.MainMenu;
 		}
@@ -177,7 +176,7 @@ Please select habitat action
 			selectedAnimal = null;
 			menuMode = menuModes.HabitatMenu;
 		} else if (input == "5") {
-			selectedAnimal.AdvanceDay();
+			CalendarService.AdvanceDay(selectedAnimal);
 			Console.WriteLine("Day advanced!");
 		} else if (input == "6") {
 			Console.WriteLine("Are you sure you want to remove this animal? This action cannnot be undone! (y/n)");

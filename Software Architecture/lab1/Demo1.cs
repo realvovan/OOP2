@@ -27,8 +27,8 @@ static class Demo1 {
 						: $"{dog.Name}'s habitat is now {dog.Habitat.Name}"
 					);
 					break;
-				case AnimalStates.Living:
-					if (!dog.IsAlive) Console.WriteLine($"{dog.Name} has died :/");
+				case AnimalStates.Dying:
+					Console.WriteLine($"{dog.Name} has died :/");
 					break;
 			}
 		};
@@ -43,7 +43,7 @@ static class Demo1 {
 		// happiness
 		store.CleanAll();
 		
-		store.AdvanceDay(); // they shouldn't die because they are fed and cleaned after
+		CalendarService.AdvanceDay(store); // they shouldn't die because they are fed and cleaned after
 		// ownership transfer
 		sharik.ChangeHabitat(person);
 		// overfilling the habitat
@@ -61,7 +61,8 @@ static class Demo1 {
 			person.GetAnimalAt(i)?.ChangeHabitat(wild);
 		}
 		// dying
-		sharik.AdvanceDay();
+		Console.WriteLine(sharik.ToString());
+		CalendarService.AdvanceDay(sharik);
 		// detaching
 		Console.WriteLine($"Number of animals in wilderness: {wild.AnimalCount}");
 		sharik.Detach();

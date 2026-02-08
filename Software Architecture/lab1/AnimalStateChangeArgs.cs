@@ -8,7 +8,6 @@ public enum AnimalStates {
 	Dying,
 	Eating,
 	Happiness,
-	Living,
 	Habitat,
 }
 public class AnimalStateChangeArgs(AnimalStates changedState) : EventArgs {

@@ -12,7 +12,7 @@ public abstract class Animal : IFeedable, IWalkable {
 	public int FeedCountToday { get; private set; } = 0;
 	public bool IsAlive { get; private set; } = true;
 	public bool IsHappy {
-		get => this.isHappy || this.Habitat?.GetType() == typeof(Wilderness);
+		get => this.isHappy || this.Habitat is not ICaregiver;
 		private set => this.isHappy = value;
 	}
 	public Habitat? Habitat { get; private set; }
@@ -46,7 +46,7 @@ public abstract class Animal : IFeedable, IWalkable {
 		// can survive if the animals is
 		// - fed
 		// - happy or lives in the wild
-		return this.FeedCountToday > 0 && (this.IsHappy || this.Habitat?.GetType() == typeof(Wilderness));
+		return this.FeedCountToday > 0 && this.IsHappy;
 	}
 	public void SetHappy(bool newHappy) {
 		if (this.IsHappy != newHappy && this.IsAlive) {
@@ -60,14 +60,7 @@ public abstract class Animal : IFeedable, IWalkable {
 			this.fireChangeStateEvent(AnimalStates.Dying);
 		}
 	}
-	public void AdvanceDay() {
-		if (!this.IsAlive) return;
-		if (!this.CanSurviveToday()) {
-			this.Die();
-		}
-		this.SetHappy(false);
-		this.FeedCountToday = 0;
-	}
+	public void ResetFeedCount() => this.FeedCountToday = 0;
 	public bool ChangeHabitat(Habitat newHabitat) {
 		if (!this.IsAlive || this.Habitat is null || this.Habitat == newHabitat || newHabitat.AnimalCount >= newHabitat.MaxAnimals) return false;
 		this.Habitat.RemoveAnimal(this);
