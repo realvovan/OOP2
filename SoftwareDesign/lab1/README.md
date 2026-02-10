@@ -35,8 +35,8 @@ graph LR
   Client --> API
   API --> MessageService
   API --> AuditService
-  MessageService --> DB[(Messages DB)]
-  AuditService --> DB[(Audit Log DB)]
+  MessageService --> DB1[(Messages DB)]
+  AuditService --> DB2[(Audit Log DB)]
   MessageService --> Queue
   Queue --> DeliveryService
   DeliveryService --> Client
@@ -95,8 +95,6 @@ stateDiagram-v2
 
   Delivered --> DeletedForMe
   Delivered --> DeletedForAll
-
-  DeletedForAll --> [*]
 ```
 
 ### Notes
