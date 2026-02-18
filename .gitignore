@@ -7,3 +7,4 @@ TestResults
 coveragereport
 *.txt
 *.json
+*.class
