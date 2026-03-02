@@ -14,6 +14,7 @@ static class Demo2 {
 	static readonly Person person = new("Owner");
 	static readonly AnimalStore store = new("PetShop");
 	static readonly Wilderness wild = new();
+	static readonly AnimalObserver observer = new();
 	static menuModes menuMode = menuModes.MainMenu;
 
 	static Habitat? selectedHabitat = null;
@@ -125,7 +126,7 @@ Please select habitat action
 6. Remove from program
 ");
 		int availableOptions = 6;
-		int walkOpt=0, feedOpt=0, runOpt=0, flyOpt=0, exitOpt=0;
+		int walkOpt=0, feedOpt=0, runOpt=0, flyOpt=0, singOpt=0, exitOpt=0;
 		if (selectedAnimal is IWalkable) {
 			availableOptions++;
 			walkOpt = availableOptions;
@@ -145,6 +146,11 @@ Please select habitat action
 			availableOptions++;
 			flyOpt = availableOptions;
 			promptBuilder.Append($"{availableOptions}. Fly\n");
+		}
+		if (selectedAnimal is ISingable) {
+			availableOptions++;
+			singOpt = availableOptions;
+			promptBuilder.Append($"{availableOptions}. Sing\n");
 		}
 		promptBuilder.Append($"{++availableOptions}. Main menu");
 		exitOpt = availableOptions;
@@ -183,6 +189,7 @@ Please select habitat action
 			string? confirmation = Console.ReadLine()?.ToLower();
 			if (confirmation == "y" || confirmation == "ye" || confirmation == "yes") {
 				selectedAnimal.Detach();
+				observer.Unsubscribe(selectedAnimal);
 				selectedAnimal = null;
 				menuMode = menuModes.MainMenu;
 				Console.WriteLine("Removed successfully");
@@ -190,23 +197,27 @@ Please select habitat action
 				Console.WriteLine("Action aborted!");
 			}
 		} else if (input == walkOpt.ToString()) {
-			bool result = selectedAnimal.Walk();
-			if (!result) Console.WriteLine("Animal cannot walk at this moment");
+			var result = selectedAnimal.Walk();
+			if (!result.Success) Console.WriteLine(result.Message);
 		} else if (input == feedOpt.ToString()) {
-			bool result = selectedAnimal.Eat();
+			var result = selectedAnimal.Eat();
 			Console.WriteLine(
-				result
+				result.Success
 				? "Animal was fed!"
-				: "Animal is not hungry!"
+				: result.Message
 			);
 		} else if (input == flyOpt.ToString()) {
 			var flyable = (IFlyable)selectedAnimal!;
-			bool result = flyable.Fly();
-			if (!result) Console.WriteLine("Animal cannot fly at this moment");
+			var result = flyable.Fly();
+			if (!result.Success) Console.WriteLine(result.Message);
 		} else if (input == runOpt.ToString()) {
 			var runnable = (IRunable)selectedAnimal!;
-			bool result = runnable.Run();
-			if (!result) Console.WriteLine("Animal cannot run at this moment");
+			var result = runnable.Run();
+			if (!result.Success) Console.WriteLine(result.Message);
+		} else if (input == singOpt.ToString()) {
+			var singable = (ISingable)selectedAnimal!;
+			var result = singable.Sing();
+			if (!result.Success) Console.WriteLine(result.Message);
 		} else if (input == exitOpt.ToString()) {
 			selectedAnimal = null;
 			menuMode = menuModes.MainMenu;
@@ -261,19 +272,11 @@ Please select habitat action
 		animals.Clear();
 	}
 	static void promptUserAnimalCreate(Habitat habitat) {
-		string prompt = @"Please select animal type
-1. Dog
-2. Canary
-3. Lizard";
-		string input = getValidInput(prompt,["1","2","3"]);
+		string prompt = "Please enter animal type (dog/canary/lizard)";
+		string animalType = getValidInput(prompt,["dog","lizard","canary"]);
 		string animalName = getValidInput("Please enter animal name",_ => true).Trim();
-		if (input == "1") {
-			new Dog(animalName,habitat).StateChanged += onAnimalStateChange;
-		} else if (input == "2") {
-			new Canary(animalName,habitat).StateChanged += onAnimalStateChange;
-		} else if (input == "3") {
-			new Lizard(animalName,habitat).StateChanged += onAnimalStateChange;
-		}
+		var animal = AnimalFactory.Create(animalType,animalName,habitat);
+		observer.Subscribe(animal);
 		Console.WriteLine("Successfully added animal!");
 	}
 	// Returns user input if it matches the predicate

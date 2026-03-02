@@ -32,10 +32,9 @@ static class Demo1 {
 					break;
 			}
 		};
-
-		store.CreateAnimalInHabitat<Dog>("Barboss");
-		store.CreateAnimalInHabitat<Canary>("Birb");
-		store.CreateAnimalInHabitat<Lizard>("Snaky");
+		AnimalFactory.Create("dog","Barboss",store);
+		AnimalFactory.Create("canary","Birb",store);
+		AnimalFactory.Create("lizard","Snaky",store);
 		// feeding
 		store.FeedAll();
 		// feeding again (shouldn't do anything)
@@ -48,11 +47,11 @@ static class Demo1 {
 		sharik.ChangeHabitat(person);
 		// overfilling the habitat
 		try {
-			person.CreateAnimalInHabitat<Lizard>("Liz1");
-			person.CreateAnimalInHabitat<Lizard>("Liz2");
-			person.CreateAnimalInHabitat<Lizard>("Liz3");
-			person.CreateAnimalInHabitat<Lizard>("Liz4");
-			person.CreateAnimalInHabitat<Lizard>("Liz5"); // should throw here
+			AnimalFactory.Create("lizard","Liz1",person);
+			AnimalFactory.Create("lizard","Liz2",person);
+			AnimalFactory.Create("lizard","Liz3",person);
+			AnimalFactory.Create("lizard","Liz4",person);
+			AnimalFactory.Create("lizard","Liz5",person); // should throw here
 		} catch (Exception e) {
 			Console.WriteLine(e.StackTrace);
 		}

@@ -24,11 +24,6 @@ public abstract class Habitat(string name) {
 	}
 	public bool HasAnimal(Animal animal) => this.animals.Contains(animal);
 	public bool IsFull() => this.animals.Count >= this.MaxAnimals;
-	public void CreateAnimalInHabitat<T>(string animalName) where T : Animal {
-		var type = typeof(T);
-		if (type.IsAbstract) throw new NotSupportedException("Cannot create an instance of abstract class");
-		Activator.CreateInstance(type,new object[] { animalName,this });
-	}
 	public IEnumerator<Animal> GetEnumerator() => this.animals.GetEnumerator();
 }
 
