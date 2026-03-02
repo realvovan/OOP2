@@ -1,22 +1,16 @@
 ﻿namespace SoftwareArch.lab1;
 
 public class Canary(string name,Habitat habitat) : Animal(name,habitat),IFlyable,ISingable {
-	public bool Fly() {
-		if (!this.IsAlive || !this.CanBeActive()) return false;
-		Console.WriteLine($"{this.Name} is flying!");
+	public ActionResult Fly() {
+		if (!this.IsAlive) return ActionResult.Fail("Animal cannot fly because it is dead");
+		if (!this.CanBeActive()) return ActionResult.Fail("Animal cannot fly because it is not fed");
 		this.fireChangeStateEvent(AnimalStates.Flying);
-		return true;
+		return ActionResult.Successful;
 	}
-	public bool Sing() {
-		if (!this.IsAlive || !this.CanBeActive()) return false;
-		Console.WriteLine($"{this.Name} is singing!");
+	public ActionResult Sing() {
+		if (!this.IsAlive) return ActionResult.Fail("Animal cannot sing because it is dead");
+		if (!this.CanBeActive()) return ActionResult.Fail("Animal cannot sing because it is not fed");
 		this.fireChangeStateEvent(AnimalStates.Singing);
-		return true;
-	}
-	public bool Sing(string sound) {
-		if (!this.IsAlive || !this.CanBeActive()) return false;
-		Console.WriteLine($"{this.Name}: {sound}");
-		this.fireChangeStateEvent(AnimalStates.Singing);
-		return true;
+		return ActionResult.Successful;
 	}
 }

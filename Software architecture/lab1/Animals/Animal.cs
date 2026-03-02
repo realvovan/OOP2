@@ -23,18 +23,19 @@ public abstract class Animal : IFeedable, IWalkable {
 		habitat.AddAnimal(this);
 	}
 
-	public bool Walk() {
-		if (!this.IsAlive) return false;
-		Console.WriteLine($"{this.Name} is walking");
+	public ActionResult Walk() {
+		if (!this.IsAlive) return ActionResult.Fail("Animal cannot walk because it is dead");
 		this.fireChangeStateEvent(AnimalStates.Walking);
-		return true;
+		return ActionResult.Successful;
 	}
-	public bool Eat() {
-		if (!this.IsAlive || this.FeedCountToday >= MAX_DAILY_FEEDING || DateTime.Now - this.LastFedAt < FeedingCooldown) return false;
+	public ActionResult Eat() {
+		if (!this.IsAlive) return ActionResult.Fail("Animal cannot eat because it is dead");
+		if (this.FeedCountToday >= MAX_DAILY_FEEDING) return ActionResult.Fail("Animal cannot eat because it has reached max feeding count");
+		if (DateTime.Now - this.LastFedAt < FeedingCooldown) return ActionResult.Fail("Animal cannot be fed so quickly, please wait");
 		this.FeedCountToday++;
 		this.LastFedAt = DateTime.Now;
 		this.fireChangeStateEvent(AnimalStates.Eating);
-		return true;
+		return ActionResult.Successful;
 	}
 	public void Clean() {
 		this.SetHappy(true);
