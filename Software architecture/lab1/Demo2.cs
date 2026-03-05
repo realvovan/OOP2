@@ -14,18 +14,12 @@ static class Demo2 {
 	static readonly Person person = new("Owner");
 	static readonly AnimalStore store = new("PetShop");
 	static readonly Wilderness wild = new();
-	static readonly AnimalObserver observer = new();
+	static readonly AnimalStateObserver stateObserver = new();
+	static readonly AnimalDeathObserver deathObserver = new();
 	static menuModes menuMode = menuModes.MainMenu;
 
 	static Habitat? selectedHabitat = null;
 	static Animal? selectedAnimal = null;
-
-	static void onAnimalStateChange(object? sender,AnimalStateChangeArgs args) {
-		var animal = (Animal)sender!;
-		if (args.ChangedState == AnimalStates.Dying && animal.Habitat is not null) {
-			Console.WriteLine($"{animal.Name} died in {animal.Habitat.Name}");
-		}
-	}
 
 	static void mainMenu() {
 		string prompt = @"Welcome to the program!
@@ -189,7 +183,8 @@ Please select habitat action
 			string? confirmation = Console.ReadLine()?.ToLower();
 			if (confirmation == "y" || confirmation == "ye" || confirmation == "yes") {
 				selectedAnimal.Detach();
-				observer.Unsubscribe(selectedAnimal);
+				stateObserver.Unsubscribe(selectedAnimal);
+				deathObserver.Unsubscribe(selectedAnimal);
 				selectedAnimal = null;
 				menuMode = menuModes.MainMenu;
 				Console.WriteLine("Removed successfully");
@@ -276,7 +271,8 @@ Please select habitat action
 		string animalType = getValidInput(prompt,["dog","lizard","canary"]);
 		string animalName = getValidInput("Please enter animal name",_ => true).Trim();
 		var animal = AnimalFactory.Create(animalType,animalName,habitat);
-		observer.Subscribe(animal);
+		stateObserver.Subscribe(animal);
+		deathObserver.Subscribe(animal);
 		Console.WriteLine("Successfully added animal!");
 	}
 	// Returns user input if it matches the predicate

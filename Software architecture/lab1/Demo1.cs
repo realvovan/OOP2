@@ -27,10 +27,11 @@ static class Demo1 {
 						: $"{dog.Name}'s habitat is now {dog.Habitat.Name}"
 					);
 					break;
-				case AnimalStates.Dying:
-					Console.WriteLine($"{dog.Name} has died :/");
-					break;
 			}
+		};
+		sharik.Died += (sender,args) => {
+			var dog = (Dog)sender!;
+			Console.WriteLine($"{dog.Name} died for reason: {args.DeathReason}");
 		};
 		AnimalFactory.Create("dog","Barboss",store);
 		AnimalFactory.Create("canary","Birb",store);
@@ -60,7 +61,6 @@ static class Demo1 {
 			person.GetAnimalAt(i)?.ChangeHabitat(wild);
 		}
 		// dying
-		Console.WriteLine(sharik.ToString());
 		CalendarService.AdvanceDay(sharik);
 		// detaching
 		Console.WriteLine($"Number of animals in wilderness: {wild.AnimalCount}");

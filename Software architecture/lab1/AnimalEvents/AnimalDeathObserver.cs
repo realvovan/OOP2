@@ -2,11 +2,11 @@ namespace SoftwareArch.lab1;
 
 public class AnimalDeathObserver : IAnimalObserver {
 	private static Dictionary<AnimalDeathReasons,string> messages = new() {
-		{ AnimalDeathReasons.NotSpecifed, "%s died for an unspecifed reason in habitat %s" },
-		{ AnimalDeathReasons.Hunger, "%s died of hunder in habitat %s" },
-		{ AnimalDeathReasons.NotCleaned, "%s died because it wasn't cleaned after in habitat %s" },
-		{ AnimalDeathReasons.HabitatNulled, "%s died because its habitat was removed" },
-		{ AnimalDeathReasons.Hunger | AnimalDeathReasons.NotCleaned, "%s died because it wasn't fed or cleaned after in habitat %s" }
+		{ AnimalDeathReasons.NotSpecifed, "{0} died for an unspecifed reason in habitat {1}" },
+		{ AnimalDeathReasons.Hunger, "{0} died of hunder in habitat {1}" },
+		{ AnimalDeathReasons.NotCleaned, "{0} died because it wasn't cleaned after in habitat {1}" },
+		{ AnimalDeathReasons.HabitatNulled, "{0} died because its habitat was removed" },
+		{ AnimalDeathReasons.Hunger | AnimalDeathReasons.NotCleaned, "{0} died because it wasn't fed and cleaned after in habitat {1}" }
 	};
 	public void Subscribe(Animal animal) {
 		animal.Died += onDied;
