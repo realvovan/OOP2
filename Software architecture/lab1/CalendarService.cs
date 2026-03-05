@@ -3,8 +3,9 @@
 public static class CalendarService {
 	public static void AdvanceDay(Animal animal) {
 		if (!animal.IsAlive) return;
-		if (!animal.CanSurviveToday()) {
-			animal.Die();
+		var deathReason = animal.CanSurviveToday();
+		if (deathReason is not null) {
+			animal.Die(deathReason.Value);
 		}
 		animal.SetHappy(false);
 		animal.ResetFeedCount();

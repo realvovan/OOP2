@@ -7,6 +7,7 @@ public abstract class Animal : IFeedable, IWalkable {
 	private bool isHappy = false;
 
 	public event EventHandler<AnimalStateChangeArgs>? StateChanged;
+	public event EventHandler<AnimalDeathEventArgs>? Died;
 	public string Name { get; set; }
 	public DateTime LastFedAt { get; private set; } = DateTime.MinValue;
 	public int FeedCountToday { get; private set; } = 0;
@@ -43,11 +44,14 @@ public abstract class Animal : IFeedable, IWalkable {
 	public bool CanBeActive() {
 		return (DateTime.Now - this.LastFedAt).TotalHours <= 8;
 	}
-	public bool CanSurviveToday() {
+	public AnimalDeathReasons? CanSurviveToday() {
 		// can survive if the animals is
 		// - fed
 		// - happy or lives in the wild
-		return this.FeedCountToday > 0 && this.IsHappy;
+		AnimalDeathReasons reason = 0;
+		if (this.FeedCountToday == 0) reason |= AnimalDeathReasons.Hunger;
+		if (!this.IsHappy) reason |= AnimalDeathReasons.NotCleaned;
+		return reason == 0 ? null : reason;
 	}
 	public void SetHappy(bool newHappy) {
 		if (this.IsHappy != newHappy && this.IsAlive) {
@@ -55,10 +59,10 @@ public abstract class Animal : IFeedable, IWalkable {
 			this.fireChangeStateEvent(AnimalStates.Happiness);
 		}
 	}
-	public void Die() {
+	public void Die(AnimalDeathReasons reason = AnimalDeathReasons.NotSpecifed) {
 		if (this.IsAlive) {
 			this.IsAlive = false;
-			this.fireChangeStateEvent(AnimalStates.Dying);
+			this.Died?.Invoke(this,new AnimalDeathEventArgs(reason));
 		}
 	}
 	public void ResetFeedCount() => this.FeedCountToday = 0;
@@ -73,7 +77,7 @@ public abstract class Animal : IFeedable, IWalkable {
 	// Method used to 'Destroy' the object by unlinking it from any habitat
 	public void Detach() {
 		if (this.Habitat is null) return;
-		this.Die();
+		this.Die(AnimalDeathReasons.HabitatNulled);
 		this.Habitat.RemoveAnimal(this);
 		this.Habitat = null;
 		this.fireChangeStateEvent(AnimalStates.Habitat);

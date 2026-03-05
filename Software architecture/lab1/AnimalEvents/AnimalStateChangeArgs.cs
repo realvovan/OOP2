@@ -5,7 +5,6 @@ public enum AnimalStates {
 	Running,
 	Flying,
 	Singing,
-	Dying,
 	Eating,
 	Happiness,
 	Habitat,
