@@ -44,14 +44,14 @@ public abstract class Animal : IFeedable, IWalkable {
 	public bool CanBeActive() {
 		return (DateTime.Now - this.LastFedAt).TotalHours <= 8;
 	}
-	public AnimalDeathReasons? CanSurviveToday() {
+	public bool CanSurviveToday(out AnimalDeathReasons deathReason) {
 		// can survive if the animals is
 		// - fed
 		// - happy or lives in the wild
-		AnimalDeathReasons reason = 0;
-		if (this.FeedCountToday == 0) reason |= AnimalDeathReasons.Hunger;
-		if (!this.IsHappy) reason |= AnimalDeathReasons.NotCleaned;
-		return reason == 0 ? null : reason;
+		deathReason = 0;
+		if (this.FeedCountToday == 0) deathReason |= AnimalDeathReasons.Hunger;
+		if (!this.IsHappy) deathReason |= AnimalDeathReasons.NotCleaned;
+		return deathReason == 0;
 	}
 	public void SetHappy(bool newHappy) {
 		if (this.IsHappy != newHappy && this.IsAlive) {
