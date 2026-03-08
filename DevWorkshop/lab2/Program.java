@@ -1,31 +1,18 @@
 package DevWorkshop.lab2;
 
-import java.util.Scanner;
-
 public class Program {
-	static int getIntFromInput(Scanner scanner,String prompt) {
-		System.out.print(prompt);
-		while (true) {
-			try {
-				int input = scanner.nextInt();
-				scanner.nextLine();
-				return input;
-			} catch(Exception _) {
-				System.out.println("Invalid input, please try again!");
-			}
+	public static void main(String[] args) throws Exception {
+		if (args.length == 0) throw new Exception("Invalid arguments");
+		String argument = args[0];
+		switch (argument.toLowerCase()) {
+			case "test1":
+				Part1.run();
+				break;
+			case "test2":
+				Part2.run();
+				break;
+			default:
+				throw new Exception("Invalid argument");
 		}
-	}
-	public static void main(String[] args) {
-		var scanner = new Scanner(System.in);
-		// 123 -> 321
-		int input = getIntFromInput(scanner, "Please enter an integer: ");
-		System.out.print("%d -> ".formatted(input));
-		int result = 0;
-		while (input != 0) {
-			int digit = input % 10;
-			result = result * 10 + digit;
-			input /= 10;
-		}
-		System.out.println(result);
 	}
 }
