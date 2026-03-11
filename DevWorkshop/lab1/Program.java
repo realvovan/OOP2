@@ -24,6 +24,7 @@ public class Program {
 				return scanner.nextInt();
 			} catch(Exception _) {
 				System.out.println("Invalid input, please try again!");
+				scanner.nextLine();
 			}
 		}
 	}
