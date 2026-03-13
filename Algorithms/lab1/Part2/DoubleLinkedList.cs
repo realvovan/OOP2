@@ -3,27 +3,26 @@ using System.Text;
 
 namespace Algorithms.lab1;
 
-class Node<T> {
-	public T Data;
-	public Node<T>? Next;
-	public Node<T>? Prev;
-	public Node(T value) {
-		this.Data = value;
-	}
-}
-
 class DoubleLinkedList<T> {
-	private Node<T>? _head;
-	private Node<T>? _tail;
+	public class Node {
+		public T Data { get; set; }
+		public Node? Next { get; internal set; }
+		public Node? Prev { get; internal set; }
+		public DoubleLinkedList<T>? Parent { get; internal set; }
+		public Node(T value,DoubleLinkedList<T> parent) {
+			this.Data = value;
+			this.Parent = parent;
+		}
+}
+	private Node? _head;
+	private Node? _tail;
 
 	public int Count { get; private set; }
-	public T this[int index] {
-		get => this._getNodeAtIndex(index).Data;
-		set => this._getNodeAtIndex(index).Data = value;
-	}
+	public Node? First => this._head;
+	public Node? Last => this._tail;
 
 	public void AddFirst(T value) {
-		var newNode = new Node<T>(value);
+		var newNode = new Node(value,this);
 		if (this._head == null) {
 			this._head = newNode;
 			this._tail = newNode;
@@ -35,7 +34,7 @@ class DoubleLinkedList<T> {
 		this.Count++;
 	}
 	public void AddLast(T value) {
-		var newNode = new Node<T>(value);
+		var newNode = new Node(value,this);
 		if (this._tail == null) {
 			this._head = newNode;
 			this._tail = newNode;
@@ -46,31 +45,57 @@ class DoubleLinkedList<T> {
 		}
 		this.Count++;
 	}
-	public T Remove(int index) {
-		if (index == 0) return this.RemoveFirst();
-		if (index == this.Count - 1) return this.RemoveLast();
-		var node = this._getNodeAtIndex(index);
-		node.Prev!.Next = node.Next;
-		node.Next!.Prev = node.Prev;
-		this.Count--;
-		return node.Data;
+	public Node GetNode(int index) {
+		if (index < 0 || index >= this.Count) throw new IndexOutOfRangeException();
+		var node = this._head;
+		while (index-- > 0) {
+			node = node!.Next;
+		}
+		return node!;
 	}
-	public void Insert(T value,int index) {
-		if (index == 0) {
-			this.AddFirst(value);
+	public void Remove(Node node) {
+		if (this != node.Parent) throw new ArgumentException("The node does not belong to this list",nameof(node));
+		if (node.Prev is null) {
+			this.RemoveFirst();
 			return;
 		}
-		if (index == this.Count) {
+		if (node.Next is null) {
+			this.RemoveLast();
+			return;
+		}
+		node.Prev.Next = node.Next;
+		node.Next.Prev = node.Prev;
+		node.Next = null;
+		node.Prev = null;
+		node.Parent = null;
+		this.Count--;
+	}
+	public void InsertAfter(T value,Node node) {
+		if (this != node.Parent) throw new ArgumentException("The node does not belong to this list",nameof(node));
+		if (node.Next is null) {
 			this.AddLast(value);
 			return;
 		}
-		var node = this._getNodeAtIndex(index);
-		var newNode = new Node<T>(value) {
-			Prev = node.Prev,
-			Next = node
+		var newNode = new Node(value,this) {
+			Prev = node,
+			Next = node.Next
 		};
-		newNode.Prev!.Next = newNode;
+		node.Next = newNode;
 		newNode.Next!.Prev = newNode;
+		this.Count++;
+	}
+	public void InsertBefore(T value,Node node) {
+		if (this != node.Parent) throw new ArgumentException("The node does not belong to this list",nameof(node));
+		if (node.Prev is null) {
+			this.AddFirst(value);
+			return;
+		}
+		var newNode = new Node(value,this) {
+			Next = node,
+			Prev = node.Prev
+		};
+		node.Prev = newNode;
+		newNode.Prev!.Next = newNode;
 		this.Count++;
 	}
 	public T RemoveFirst() {
@@ -80,8 +105,10 @@ class DoubleLinkedList<T> {
 
 		if (this._head is not null) {
 			this._head.Prev!.Next = null;
+			this._head.Prev.Parent = null;
 			this._head.Prev = null;
 		} else {
+			this._tail!.Parent = null;
 			this._tail = null;
 		}
 
@@ -96,8 +123,10 @@ class DoubleLinkedList<T> {
 
 		if (this._tail is not null) {
 			this._tail.Next!.Prev = null;
+			this._tail.Next.Parent = null;
 			this._tail.Next = null;
 		} else {
+			this._head!.Parent = null;
 			this._head = null;
 		}
 
@@ -120,14 +149,6 @@ class DoubleLinkedList<T> {
 		}
 		result.Append(']');
 		return result.ToString();
-	}
-	private Node<T> _getNodeAtIndex(int index) {
-		if (index < 0 || index >= this.Count) throw new IndexOutOfRangeException();
-		var node = this._head;
-		while (index-- > 0) {
-			node = node!.Next;
-		}
-		return node!;
 	}
 
 	public DoubleLinkedList() {

@@ -2,11 +2,6 @@ using System.Text;
 
 namespace Algorithms.lab2;
 
-class KVPair<TKey,TValue>(TKey key,TValue value) {
-	public TKey Key { get; } = key;
-	public TValue Value { get; } = value;
-}
-
 class SimpleSquareHashTable {
 	private Square[] _array;
 	private int _size;

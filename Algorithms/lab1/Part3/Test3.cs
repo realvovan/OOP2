@@ -20,7 +20,6 @@ static class Test3 {
 				j--;
 			}
 			newList[j + 1] = value;
-			Console.WriteLine(newList);
 		}
 		return newList;
 	}

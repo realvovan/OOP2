@@ -1,13 +1,17 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Algorithms.lab2;
 
 readonly struct Point2(int x,int y) {
 	public readonly int X { get; } = x;
 	public readonly int Y { get; } = y;
 	public float DistanceTo(Point2 other) => GetDistance(this,other);
+	public override string ToString() => $"[{this.X}, {this.Y}]";
+	public override int GetHashCode() => HashCode.Combine(this.X,this.Y);
+	public override bool Equals(object? obj) => obj is Point2 && obj.GetHashCode() == this.GetHashCode();
 	public static float GetDistance(Point2 pointA,Point2 pointB) {
 		return MathF.Sqrt(MathF.Pow(pointB.X - pointA.X,2) + MathF.Pow(pointB.Y - pointA.Y,2));
 	}
-	public override string ToString() => $"[{this.X}, {this.Y}]";
 }
 
 class Square {
@@ -24,6 +28,8 @@ class Square {
 			 + $"        {this.C}\t{this.D}\n"
 			 + $"Perimeter: {this.GetPerimeter()}, area: {this.GetArea()}";
 	}
+	public override int GetHashCode() => HashCode.Combine(this.GetPerimeter(),this.GetArea());
+	public override bool Equals(object? obj) => obj is Square && this.GetHashCode() == obj.GetHashCode();
 	public Square(Point2 pointA,int length) {
 		if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
 		this.A = pointA;
