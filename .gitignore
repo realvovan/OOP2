@@ -6,5 +6,4 @@ bin
 TestResults
 coveragereport
 *.txt
-*.json
 *.class
