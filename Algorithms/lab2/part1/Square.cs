@@ -29,7 +29,10 @@ class Square {
 			 + $"Perimeter: {this.GetPerimeter()}, area: {this.GetArea()}";
 	}
 	public override int GetHashCode() => HashCode.Combine(this.GetPerimeter(),this.GetArea());
-	public override bool Equals(object? obj) => obj is Square && this.GetHashCode() == obj.GetHashCode();
+	public override bool Equals(object? obj) =>
+		obj is Square sqr
+		&& this.GetPerimeter() == sqr.GetPerimeter()
+		&& this.GetArea() == sqr.GetArea();
 	public Square(Point2 pointA,int length) {
 		if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
 		this.A = pointA;

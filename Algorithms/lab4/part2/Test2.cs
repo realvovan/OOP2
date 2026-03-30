@@ -3,24 +3,13 @@ using System.Text.RegularExpressions;
 namespace Algorithms.lab4;
 
 static class Test2 {
-	static T[] insertionSort<T>(T[] array,Comparison<T> comp) {
-		T[] sorted = array.ToArray();
-		for (int i = 1; i < sorted.Length; i++) {
-			T val = sorted[i];
-			int j = i - 1;
-			while (j >= 0 && comp(sorted[j],val) > 0) {
-				sorted[j + 1] = sorted[j];
-				j--;
-			}
-			sorted[j + 1] = val;
+	static int[] indexSort<T>(T[] array,Comparison<T> comp) {
+		var index = new int[array.Length];
+		for (int i = 0; i < array.Length; i++) {
+			index[i] = i;
 		}
-		return sorted;
-	}
-	static void printStudents(Student[] students) {
-		Console.WriteLine($"{"First name",-12} {"Last name",-10} {"Id",-10} {"Group"}");
-		foreach (var i in students) {
-			Console.WriteLine($"{i.FirstName,-12} {i.LastName,-10} {i.Id,-10} {i.Group}");
-		}
+		Array.Sort(index, (i,j) => comp(array[i],array[j]));
+		return index;
 	}
 	public static void Run() {
 		var students = new Student[] {
@@ -31,13 +20,19 @@ static class Test2 {
 			new Student("First4","Lats4",25,2)
 		};
 		Console.WriteLine("Original array:");
-		printStudents(students);
-		var sorted = insertionSort(students,(a,b) => {
+		foreach (var student in students) {
+			Console.WriteLine($"{student.FirstName,-12} {student.LastName,-10} {student.Id,-10} {student.Group}");
+		}
+		var sortedIndex = indexSort(students,(a,b) => {
 			int groupComp = a.Group.CompareTo(b.Group);
 			if (groupComp != 0) return groupComp;
 			return a.Id.CompareTo(b.Id);
 		});
 		Console.WriteLine("\nStudents after sorting by group number then id:");
-		printStudents(sorted);
+		Console.WriteLine($"{"First name",-12} {"Last name",-10} {"Id",-10} {"Group"}");
+		foreach (int i in sortedIndex) {
+			var student = students[i];
+			Console.WriteLine($"{student.FirstName,-12} {student.LastName,-10} {student.Id,-10} {student.Group}");
+		}
 	}
 }
