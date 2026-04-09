@@ -15,8 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\lab3.BSS\lab3.BLL.csproj" />
-    <ProjectReference Include="..\lab3.DAL\lab3.DAL.csproj" />
+    <ProjectReference Include="..\lab3.Domain\lab3.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

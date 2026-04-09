@@ -1,4 +1,4 @@
-﻿using lab3.BLL.DTOs;
+﻿using lab3.Domain.DTOs;
 
 namespace lab3.PL;
 
@@ -15,10 +15,14 @@ partial class MainWindow {
 		return label;
 	}
 	private async void LoadAllProjects() {
-		foreach (var proj in await this._projectService.GetAllProjectsAsync()) {
+		var projects = await this._httpClient.GetAsync<IEnumerable<ProjectDto>>(ApiEndpoints.ProjectsController.ROUTE);
+		var tasks = await this._httpClient.GetAsync<IEnumerable<TaskItemDto>>(ApiEndpoints.TaskItemCotroller.ROUTE);
+		if (projects is null || tasks is null) return;
+
+		foreach (var proj in projects) {
 			this.CreateProjectLabel(proj);
 		}
-		foreach (var task in await this._tasksService.GetAllTasksAsync()) {
+		foreach (var task in tasks) {
 			this._loadedTasks.Add(task);
 		}
 	}
@@ -32,7 +36,7 @@ partial class MainWindow {
 		}
 	}
 	private void ProjCreate_Click(object sender,EventArgs e) {
-		using var projectEditor = new ProjectEditor(this._projectService);
+		using var projectEditor = new ProjectEditor(this._httpClient);
 		bool result = projectEditor.ShowDialog();
 		if (!result) return;
 		ProjectDisplay label = this.CreateProjectLabel(projectEditor.Project);
@@ -60,14 +64,15 @@ partial class MainWindow {
 	}
 	private async void ProjDelete_Click(object sender,EventArgs e) {
 		if (this._selectedProject is null) return;
-		var result = await this._projectService.RemoveProjectAsync(this._selectedProject.ProjectId);
-		if (!result.Success) {
-			MessageBox.Show(
-				caption: "Oops!",
-				text: $"We couldn't delete this project. Here's the reason: {result.Message}",
-				icon: MessageBoxIcon.Exclamation,
-				buttons: MessageBoxButtons.OK
-			);
+		var messageBoxResult = MessageBox.Show(
+			caption: "Hey!",
+			text: "Are you sure you want to delete this project, all the tasks in this project will be deleted too? This CANNOT be undone!",
+			icon:MessageBoxIcon.Question,
+			buttons:MessageBoxButtons.YesNo
+		);
+		if (messageBoxResult == DialogResult.No) return;
+		bool result = await this._httpClient.DeleteAsync(ApiEndpoints.ProjectsController.DELETE_URL + $"?projId={this._selectedProject.ProjectId}");
+		if (!result) {
 			this._selectedProject.SetSelectionState(false);
 			this._selectedProject = null;
 			this._selectedProject = null;
@@ -94,16 +99,9 @@ partial class MainWindow {
 				buttons: MessageBoxButtons.OK);
 			return;
 		}
-		var project = await this._projectService.GetProjectAsync(this._selectedProject.ProjectId);
-		if (project is null) {
-			MessageBox.Show(
-				caption: "Oops!",
-				text: $"Couldn't open the project editor. We couldn't find the project with id [{this._selectedProject.ProjectId}]",
-				icon: MessageBoxIcon.Exclamation,
-				buttons: MessageBoxButtons.OK);
-			return;
-		}
-		using var projectEditor = new ProjectEditor(this._projectService,project);
+		var project = await this._httpClient.GetAsync<ProjectDto>(ApiEndpoints.ProjectsController.ROUTE + $"/{this._selectedProject.ProjectId}");
+		if (project is null) return;
+		using var projectEditor = new ProjectEditor(this._httpClient,project);
 		bool result = projectEditor.ShowDialog();
 		if (!result) return;
 		this._selectedProject.ProjectName.Text = projectEditor.Project.Name;

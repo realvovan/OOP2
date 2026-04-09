@@ -1,4 +1,4 @@
-﻿using lab3.BLL.DTOs;
+﻿using lab3.Domain.DTOs;
 using System.ComponentModel;
 
 namespace lab3.PL;

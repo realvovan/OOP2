@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using lab3.BLL.DTOs;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+﻿using lab3.Domain.DTOs;
 
 namespace lab3.PL;
 
@@ -26,16 +24,10 @@ partial class MainWindow {
 	}
 	private async Task SetSelectedTaskStatus(Domain.TaskStatus status) {
 		if (this._selectedTask is null) return;
-		var result = await this._tasksService.SetTaskStatus(this._selectedTask.TaskItem.Id,status);
-		if (!result.Success) {
-			MessageBox.Show(
-				caption:"Oops!",
-				text:$"We couldn't update task status. Here's the reason: {result.Message}",
-				icon: MessageBoxIcon.Exclamation,
-				buttons: MessageBoxButtons.OK
-			);
-			return;
-		}
+		bool result = await this._httpClient.PatchAsync(
+			ApiEndpoints.TaskItemCotroller.UPDATE_STATUS_URL + $"?taskId={this._selectedTask.TaskItem.Id}&status={status}"
+		);
+		if (!result) return;
 		this._selectedTask.TaskItem.Status = status;
 		this._selectedTask.UpdateTextLabels();
 		this._selectedTask.Visible = status != Domain.TaskStatus.Completed || this.ShowCompleted.Checked;
@@ -53,7 +45,7 @@ partial class MainWindow {
 			);
 			return;
 		}
-		using var taskEditor = new TaskEditor(this._tasksService,this._selectedProject);
+		using var taskEditor = new TaskEditor(this._httpClient,this._selectedProject);
 		bool result = taskEditor.ShowDialog();
 		if (!result) return;
 		this.CreateTaskLabel(taskEditor.TaskItem);
@@ -77,7 +69,7 @@ partial class MainWindow {
 				buttons: MessageBoxButtons.OK);
 			return;
 		}
-		if (await this._tasksService.GetTaskAsync(this._selectedTask.TaskItem.Id) is null) {
+		if (await this._httpClient.GetAsync<ProjectDto>(ApiEndpoints.TaskItemCotroller.ROUTE + $"/{this._selectedTask.TaskItem.Id}") is null) {
 			MessageBox.Show(
 				caption: "Oops!",
 				text: $"Couldn't open the task editor. We couldn't find the task with id [{this._selectedTask.TaskItem.Id}]",
@@ -85,7 +77,7 @@ partial class MainWindow {
 				buttons: MessageBoxButtons.OK);
 			return;
 		}
-		using var taskEditor = new TaskEditor(this._tasksService,this._selectedTask.TaskItem);
+		using var taskEditor = new TaskEditor(this._httpClient,this._selectedTask.TaskItem);
 		bool result = taskEditor.ShowDialog();
 		if (!result) return;
 		this._selectedTask.TaskItem = taskEditor.TaskItem;
@@ -94,14 +86,8 @@ partial class MainWindow {
 	}
 	private async void TaskDelete_Click(object sender,EventArgs e) {
 		if (this._selectedTask is null) return;
-		var result = await this._tasksService.RemoveTaskAsync(this._selectedTask.TaskItem.Id);
-		if (!result.Success) {
-			MessageBox.Show(
-				caption: "Oops!",
-				text: $"We couldn't delete this task. Here's the reason: {result.Message}",
-				icon: MessageBoxIcon.Exclamation,
-				buttons: MessageBoxButtons.OK
-			);
+		bool success = await this._httpClient.DeleteAsync(ApiEndpoints.TaskItemCotroller.DELETE_URL + $"?taskId={this._selectedTask.TaskItem.Id}");
+		if (!success) {
 			this._selectedTask.BackColor = TaskDisplay.BaseColor;
 			this._selectedTask = null;
 			this.ToggleTopPanelButtons();

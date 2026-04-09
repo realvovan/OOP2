@@ -1,19 +1,17 @@
-using lab3.Domain;
+namespace lab3.Domain.DTOs;
 
-namespace lab3.BLL.DTOs;
-
-public class TaskItemDto() {
-	public Guid Id { get; set; } = Guid.NewGuid();
+public class TaskItemDto {
+	public Guid Id { get; set; }
 	public string Name { get; set; } = "Task";
 	public string Description { get; set; } = string.Empty;
 	public Guid ProjectId { get; set; }
-	public Domain.TaskStatus Status { get; set; }
+	public TaskStatus Status { get; set; }
 	public TaskProirity Proirity { get; set; }
 	public DateTime CreatedAt { get; init; } = DateTime.Now;
 	public DateTime? DueTime { get; set; }
 	public bool IsExparationNotified { get; set; } = false;
 
-	public TaskItem ToEntity() => new TaskItem(
+	public TaskItem ToEntity(bool generateGuid) => new TaskItem(
 		this.Name,
 		this.Description,
 		this.Proirity,
@@ -21,7 +19,7 @@ public class TaskItemDto() {
 		this.Status,
 		this.DueTime
 	) {
-		Id = this.Id,
+		Id = generateGuid ? Guid.NewGuid() : this.Id,
 		CreatedAt = this.CreatedAt
 	};
 
@@ -37,15 +35,15 @@ public class TaskItemDto() {
 	};
 }
 
-public class ProjectDto() {
-	public Guid Id { get; set; } = Guid.NewGuid();
+public class ProjectDto {
+	public Guid Id { get; set; }
 	public string Name { get; set; } = "Project";
 	public string Description { get; set; } = string.Empty;
 
-	public Project ToEntity() => new Project(
+	public Project ToEntity(bool generateGuid) => new Project(
 		this.Name,
 		this.Description
-	) { Id = this.Id };
+	) { Id = generateGuid ? Guid.NewGuid() : this.Id };
 
 	public static ProjectDto FromEntity(Project project) => new ProjectDto {
 		Id = project.Id,

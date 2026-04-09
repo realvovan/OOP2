@@ -1,20 +1,19 @@
-using lab3.BLL;
-using lab3.BLL.DTOs;
+using lab3.Domain.DTOs;
 using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace lab3.PL;
 public partial class MainWindow : Form {
 	private readonly List<TaskItemDto> _loadedTasks = new();
-	private TasksService _tasksService;
-	private ProjectService _projectService;
+	private readonly SimplifiedHttpClient _httpClient = new();
 	private ProjectDisplay? _selectedProject;
 	private TaskDisplay? _selectedTask;
-	public MainWindow(TasksService taskService,ProjectService projectService) {
+	public MainWindow() {
 		InitializeComponent();
-		this._tasksService = taskService;
-		this._projectService = projectService;
 		this.MaximumSize = this.Size;
 		this.MinimumSize = this.Size;
+
+		this.Disposed += (s,e) => this._httpClient.Dispose();
+
 		this.ProjList.ControlRemoved += (_,_) => {
 			this.NoProjectsLabel.Visible = this.ProjList.Controls.Count == 1;
 			this.UpdateProjectLabelWidth();

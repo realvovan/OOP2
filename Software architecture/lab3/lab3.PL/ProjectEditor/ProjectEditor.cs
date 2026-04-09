@@ -1,19 +1,18 @@
-﻿using lab3.BLL;
-using lab3.BLL.DTOs;
+﻿using lab3.Domain.DTOs;
 
 namespace lab3.PL;
 
 public partial class ProjectEditor : Form {
-	private ProjectService _service;
+	private SimplifiedHttpClient _httpClient;
 	private ProjectDto _dto;
 	private bool _isCanceled = true;
 	private bool _isCreating;
 
 	public ProjectDto Project => this._dto;
 
-	public ProjectEditor(ProjectService projectService,ProjectDto? projectToEdit = null) {
+	public ProjectEditor(SimplifiedHttpClient httpClient,ProjectDto? projectToEdit = null) {
 		InitializeComponent();
-		this._service = projectService;
+		this._httpClient = httpClient;
 		this.CancelButton = this.ProjCancelBtn;
 		this.AcceptButton = this.ProjSaveBtn;
 		if (projectToEdit is null) {
@@ -49,29 +48,15 @@ public partial class ProjectEditor : Form {
 		this._dto.Name = this.ProjNameBox.Text.Trim();
 		this._dto.Description = this.ProjDescBox.Text.Trim();
 
-		ActionResult dbResult;
 		if (this._isCreating) {
-			dbResult = await this._service.CreateProjectAsync(this._dto);
+			var dtoFromServer = await this._httpClient.PostAsync<ProjectDto,ProjectDto>(ApiEndpoints.ProjectsController.ROUTE,this._dto);
+			if (dtoFromServer is null) return;
+			this._dto.Id = dtoFromServer.Id;
 		} else {
-			dbResult = await this._service.UpdateProjectAsync(this._dto);
+			bool success = await this._httpClient.PutAsync(ApiEndpoints.ProjectsController.UPDATE_URL,this._dto);
+			if (!success) return;
 		}
-		if (dbResult.Success) {
-			this._isCanceled = false;
-			this.Close();
-			return;
-		}
-		this._isCanceled = true;
-		var dialogResult = MessageBox.Show(
-			caption: "Oops!",
-			text: $"We couldn't save changes. Here's the reason: {dbResult.Message}",
-			icon: MessageBoxIcon.Exclamation,
-			buttons: MessageBoxButtons.RetryCancel
-		);
-		if (dialogResult == DialogResult.Retry) {
-			this.ProjSaveBtn.Enabled = true;
-			this.ProjCancelBtn.Enabled = true;
-			return;
-		}
+		this._isCanceled = false;
 		this.Close();
 	}
 }

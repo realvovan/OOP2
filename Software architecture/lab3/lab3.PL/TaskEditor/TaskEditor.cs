@@ -1,17 +1,16 @@
 ﻿using System.Threading.Tasks;
-using lab3.BLL;
-using lab3.BLL.DTOs;
+using lab3.Domain.DTOs;
 
 namespace lab3.PL;
 
 public partial class TaskEditor : Form {
-	private readonly TasksService _service;
+	private readonly SimplifiedHttpClient _httpClient;
 	private TaskItemDto _dto;
 	private bool _isCanceled = true;
 	private bool _isCreating;
 
 	public TaskItemDto TaskItem => this._dto;
-	public TaskEditor(TasksService taskService,TaskItemDto task) : this(taskService) {
+	public TaskEditor(SimplifiedHttpClient httpClient,TaskItemDto task) : this(httpClient) {
 		this._isCreating = false;
 		this._dto = task;
 		this.Text = "Edit task";
@@ -26,7 +25,7 @@ public partial class TaskEditor : Form {
 			this.EnableDueTime.Checked = true;
 		}
 	}
-	public TaskEditor(TasksService taskService,ProjectDisplay selectedProject) : this(taskService) {
+	public TaskEditor(SimplifiedHttpClient httpClient,ProjectDisplay selectedProject) : this(httpClient) {
 		this._isCreating = true;
 		this._dto = new TaskItemDto {
 			ProjectId = selectedProject.ProjectId,
@@ -37,9 +36,9 @@ public partial class TaskEditor : Form {
 		this.DueDatePicker.Value = DateTime.Now;
 	}
 #pragma warning disable CS8618
-	private TaskEditor(TasksService taskService) {
+	private TaskEditor(SimplifiedHttpClient httpClient) {
 		InitializeComponent();
-		this._service = taskService;
+		this._httpClient = httpClient;
 		this.AcceptButton = this.TaskSaveBtn;
 		this.CancelButton = this.TaskjCancelBtn;
 	}
@@ -69,29 +68,15 @@ public partial class TaskEditor : Form {
 		this._dto.DueTime = this.EnableDueTime.Checked ? this.DueDatePicker.Value : null;
 		this._dto.IsExparationNotified = false;
 
-		ActionResult dbResult;
 		if (this._isCreating) {
-			dbResult = await this._service.CreateTaskAsync(this._dto);
+			var dtoFromServer = await this._httpClient.PostAsync<TaskItemDto,TaskItemDto>(ApiEndpoints.TaskItemCotroller.ROUTE,this._dto);
+			if (dtoFromServer is null) return;
+			this._dto.Id = dtoFromServer.Id;
 		} else {
-			dbResult = await this._service.UpdateTaskAsync(this._dto);
+			bool success = await this._httpClient.PutAsync(ApiEndpoints.TaskItemCotroller.UPDATE_URL,this._dto);
+			if (!success) return;
 		}
-		if (dbResult.Success) {
-			this._isCanceled = false;
-			this.Close();
-			return;
-		}
-		this._isCanceled = true;
-		var dialogResult = MessageBox.Show(
-			caption: "Oops!",
-			text: $"We couldn't save changes. Here's the reason: {dbResult.Message}",
-			icon: MessageBoxIcon.Exclamation,
-			buttons: MessageBoxButtons.RetryCancel
-		);
-		if (dialogResult == DialogResult.Retry) {
-			this.TaskSaveBtn.Enabled = true;
-			this.TaskjCancelBtn.Enabled = true;
-			return;
-		}
+		this._isCanceled = false;
 		this.Close();
 	}
 }

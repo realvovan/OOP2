@@ -1,28 +1,27 @@
-using lab3.BLL.DTOs;
+using lab3.BLL.Interfaces;
 using lab3.DAL.Interfaces;
 using lab3.Domain;
+using lab3.Domain.DTOs;
 
 namespace lab3.BLL;
 
-public class TasksService {
+public class TasksService : ITaskService {
 	private readonly IUnitOfWork _uow;
 
 	private IRepository<TaskItem> _tasks => this._uow.Tasks;
 
-	public async Task<ActionResult> CreateTaskAsync(TaskItemDto task) {
-		try {
-			this._tasks.Add(task.ToEntity());
-		} catch (Exception e) {
-			return ActionResult.Fail($"Couldn't create task. {e.Message}");
-		}
-		return await this.SaveAllChangesAsync();
+	public async Task<TaskItemDto> CreateTaskAsync(TaskItemDto taskDto) {
+		var taskItem = taskDto.ToEntity(true);
+		this._tasks.Add(taskItem);
+		await this._uow.SaveChangesAsync();
+		return TaskItemDto.FromEntity(taskItem);
 	}
 
-	public async Task<ActionResult> RemoveTaskAsync(Guid taskId) {
-		var task = await this._tasks.GetByIdAsync(taskId);
-		if (task is null) return ActionResult.Fail($"No task with given id exists ({taskId})");
+	public async Task RemoveTaskAsync(Guid taskId) {
+		var task = await this._tasks.GetByIdAsync(taskId)
+			?? throw new InvalidDataException($"No task with given id exists ({taskId})");
 		this._tasks.Remove(task);
-		return await this.SaveAllChangesAsync();
+		await this._uow.SaveChangesAsync();
 	}
 
 	public async Task<IEnumerable<TaskItemDto>> GetAllTasksAsync() {
@@ -36,36 +35,30 @@ public class TasksService {
 		return TaskItemDto.FromEntity(task);
 	}
 
-	public async Task<ActionResult> UpdateTaskAsync(TaskItemDto updatedTask) {
-		var task = await this._tasks.GetByIdAsync(updatedTask.Id);
-		if (task is null)
-			return ActionResult.Fail($"No task with given id exists ({updatedTask.Id})");
-		try {
-			task.ChangeName(updatedTask.Name);
-			task.ChangeDescription(updatedTask.Description);
-			task.DueTime = updatedTask.DueTime;
-			task.Status = updatedTask.Status;
-			task.Proirity = updatedTask.Proirity;
-			return await this.SaveAllChangesAsync();
-		} catch (Exception e) {
-			return ActionResult.Fail($"Couldn't update task. {e.Message}");
-		}
+	public async Task UpdateTaskAsync(TaskItemDto updatedTask) {
+		var task = await this._tasks.GetByIdAsync(updatedTask.Id)
+			?? throw new InvalidDataException($"No task with given id exists ({updatedTask.Id})");
+
+		task.ChangeName(updatedTask.Name);
+		task.ChangeDescription(updatedTask.Description);
+		task.DueTime = updatedTask.DueTime;
+		task.Status = updatedTask.Status;
+		task.Proirity = updatedTask.Proirity;
+		await this._uow.SaveChangesAsync();
 	}
 
-	public async Task<ActionResult> SetTaskPriority(Guid taskId,int proirity) {
-		var task = await this._tasks.GetByIdAsync(taskId);
-		if (task is null) return ActionResult.Fail($"No task with given id exists ({taskId})");
+	public async Task SetTaskPriority(Guid taskId,int proirity) {
+		var task = await this._tasks.GetByIdAsync(taskId)
+			?? throw new InvalidDataException($"No task with given id exists ({taskId})");
 		task.Proirity = (TaskProirity)Math.Clamp(proirity,(int)TaskProirity.None,(int)TaskProirity.High);
-		return await this.SaveAllChangesAsync();
+		await this._uow.SaveChangesAsync();
 	}
 
-	public async Task<ActionResult> SaveAllChangesAsync() => await UnitOfWorkHelper.SaveAllChanges(this._uow);
-
-	public async Task<ActionResult> SetTaskStatus(Guid taskId,Domain.TaskStatus status) {
-		var task = await this._tasks.GetByIdAsync(taskId);
-		if (task is null) return ActionResult.Fail($"No task with given id exists ({taskId})");
+	public async Task SetTaskStatus(Guid taskId,Domain.TaskStatus status) {
+		var task = await this._tasks.GetByIdAsync(taskId)
+			?? throw new InvalidDataException($"No task with given id exists ({taskId})");
 		task.Status = status;
-		return await this.SaveAllChangesAsync();
+		await this._uow.SaveChangesAsync();
 	}
 
 	public TasksService(IUnitOfWork uow) {
