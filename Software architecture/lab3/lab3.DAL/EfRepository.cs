@@ -1,9 +1,10 @@
 using lab3.DAL.Interfaces;
+using lab3.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace lab3.DAL;
 
-public class EfRepository<T> : IRepository<T> where T : class {
+public class EfRepository<T> : IRepository<T> where T : Entity {
 	private readonly DbSet<T> _set;
 
 	public void Add(T entity) => this._set.Add(entity);

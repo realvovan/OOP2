@@ -1,7 +1,6 @@
 ﻿namespace lab3.Domain;
 
-public class Project {
-	public Guid Id { get; init; } = Guid.NewGuid();
+public class Project : Entity {
 	public string Name { get; private set; } = null!;
 	public string Description { get; private set; } = null!;
 
