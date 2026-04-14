@@ -37,7 +37,7 @@ static class Test1 {
 			Console.WriteLine("No students with military training");
 			return;
 		}
-		int key = 17; // or anything else really im just lazy to read user input lol
+		int key = 29; // or anything else really im just lazy to read user input lol
 		int index = InterpolationSearcher.Search(students,key,s => s.Id,start);
 		if (index != -1) {
 			Console.WriteLine("Found:");

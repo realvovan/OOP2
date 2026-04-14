@@ -8,7 +8,7 @@ readonly struct Point2(int x,int y) {
 	public float DistanceTo(Point2 other) => GetDistance(this,other);
 	public override string ToString() => $"[{this.X}, {this.Y}]";
 	public override int GetHashCode() => HashCode.Combine(this.X,this.Y);
-	public override bool Equals(object? obj) => obj is Point2 && obj.GetHashCode() == this.GetHashCode();
+	public override bool Equals(object? obj) => obj is Point2 p2 && this.X == p2.X && this.Y == p2.Y;
 	public static float GetDistance(Point2 pointA,Point2 pointB) {
 		return MathF.Sqrt(MathF.Pow(pointB.X - pointA.X,2) + MathF.Pow(pointB.Y - pointA.Y,2));
 	}
