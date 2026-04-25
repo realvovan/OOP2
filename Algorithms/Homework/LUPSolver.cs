@@ -92,7 +92,7 @@ class LupSolver
 		Console.WriteLine($"\nMax absolute error: {maxError:E4}");
 	}
  
-	static void Main() {
+	public static void Run() {
 		Console.WriteLine(@"
 Given a system:
 	-x₁ + 2x₂ - 5x₃ -  x₄ = -14
