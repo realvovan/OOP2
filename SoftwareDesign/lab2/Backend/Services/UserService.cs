@@ -10,13 +10,14 @@ public class UserService(DatabaseContext dbContext) {
 	private readonly DatabaseContext _db = dbContext;
 	private readonly DbSet<User> _users = dbContext.Users;
 	public async Task<User?> CreateUserAsync(string username) {
-		if (!UserValidator.ValidateUsername(username)) throw new FormatException("Invalid username format");
+		// if (!UserValidator.ValidateUsername(username)) throw new FormatException("Invalid username format");
 		try {
 			var user = new User(username);
 			this._users.Add(user);
 			await this._db.SaveChangesAsync();
 			return user;
 		} catch (DbUpdateException) {
+			Console.WriteLine("+==================HERE");
 			throw new UsernameAlreadyExistsException(username);
 		}
 	}

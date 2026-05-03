@@ -8,7 +8,7 @@ namespace SoftwareDesign.lab2.Controllers;
 
 [ApiController]
 [Route("api/messages")]
-public class MessageController(MessageService messageService,UserService userService) : Controller {
+public class MessageController(MessageService messageService,UserService userService) : ControllerBase {
 	private readonly MessageService _msgService = messageService;
 	private readonly UserService _usrService = userService;
 

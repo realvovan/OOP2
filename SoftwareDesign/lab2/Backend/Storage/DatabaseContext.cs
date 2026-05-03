@@ -4,7 +4,7 @@ using SoftwareDesign.lab2.Models;
 
 namespace SoftwareDesign.lab2.Storage;
 
-public class DatabaseContext(DbContextOptions options) : DbContext(options) {
+public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options) {
 	public DbSet<Message> Messages { get; set; }
 	public DbSet<User> Users { get; set; }
 	public DbSet<ChannelMember> ChannelMembers { get; set; }

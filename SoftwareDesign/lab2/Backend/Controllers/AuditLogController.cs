@@ -5,7 +5,7 @@ namespace SoftwareDesign.lab2.Controllers;
 
 [ApiController]
 [Route("api/audit")]
-public class AuditLogController(AuditLogService auditLogService) : Controller {
+public class AuditLogController(AuditLogService auditLogService) : ControllerBase {
 	private readonly AuditLogService _auditService = auditLogService;
 
 	[HttpGet]

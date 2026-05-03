@@ -7,7 +7,7 @@ namespace SoftwareDesign.lab2.Controllers;
 
 [ApiController]
 [Route("api/users")]
-public class UserController(UserService userService) : Controller {
+public class UserController(UserService userService) : ControllerBase {
 	private readonly UserService _userService = userService;
 
 	[HttpPost("register")]
