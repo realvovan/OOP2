@@ -5,6 +5,10 @@ using SoftwareDesign.lab2.Storage;
 
 namespace SoftwareDesign.lab2.Services;
 
+/// <summary>
+/// Service for managing messaging operations including channels, messages, and real-time updates.
+/// Handles message creation, retrieval, deletion, and user typing state notifications via SignalR.
+/// </summary>
 public class MessageService(
 	DatabaseContext dbContext,
 	QueueService queueService,
@@ -20,6 +24,12 @@ public class MessageService(
 
 	public DatabaseContext DatabaseContext => this._db;
 
+	/// <summary>
+	/// Creates a new message channel with the specified creator.
+	/// </summary>
+	/// <param name="creatorId">The ID of the user creating the channel.</param>
+	/// <returns>Returns the created MessageChannel object.</returns>
+	/// <exception cref="InvalidOperationException">Thrown when the user ID does not exist.</exception>
 	public async Task<MessageChannel> CreateChannelAsync(Guid creatorId) {
 		var user = await this._db.Users.FirstOrDefaultAsync(u => u.Id == creatorId)
 			?? throw new InvalidOperationException($"No user with given id exists [{creatorId}]");
@@ -29,6 +39,13 @@ public class MessageService(
 		await this._db.SaveChangesAsync();
 		return channel;
 	}
+
+	/// <summary>
+	/// Adds a user as a member to an existing message channel.
+	/// </summary>
+	/// <param name="userId">The ID of the user to add to the channel.</param>
+	/// <param name="channelId">The ID of the channel to add the user to.</param>
+	/// <exception cref="InvalidOperationException">Thrown when the user ID or channel ID does not exist.</exception>
 	public async Task AddChannelMemberAsync(Guid userId,Guid channelId) {
 		var user = await this._db.Users.FirstOrDefaultAsync(u => u.Id == userId)
 			?? throw new InvalidOperationException($"No user with given id exists [{userId}]");
@@ -37,9 +54,25 @@ public class MessageService(
 		this._db.ChannelMembers.Add(new ChannelMember(user.Id,channel.Id));
 		await this._db.SaveChangesAsync();
 	}
+
+	/// <summary>
+	/// Retrieves a message channel by its ID.
+	/// </summary>
+	/// <param name="channelId">The ID of the channel to retrieve.</param>
+	/// <returns>Returns the MessageChannel object if found; otherwise returns null.</returns>
 	public async Task<MessageChannel?> GetChannelAsync(Guid channelId) {
 		return await this._db.Channels.FirstOrDefaultAsync(c => c.Id == channelId);
 	}
+
+	/// <summary>
+	/// Sends a new message to a specific channel.
+	/// The message is enqueued for processing and will be broadcast to channel members via SignalR.
+	/// </summary>
+	/// <param name="senderId">The ID of the user sending the message.</param>
+	/// <param name="channelId">The ID of the channel to send the message to.</param>
+	/// <param name="content">The message content text.</param>
+	/// <returns>Returns the created Message object.</returns>
+	/// <exception cref="InvalidOperationException">Thrown when the message content is empty or whitespace.</exception>
 	public async Task<Message> SendMessageAsync(Guid senderId,Guid channelId,string content) {
 		if (string.IsNullOrWhiteSpace(content)) throw new InvalidOperationException("Cannot send an empty message.");
 		var message = new Message {
@@ -51,6 +84,13 @@ public class MessageService(
 		await this._queueService.EnqueueAsync(message);
 		return message;
 	}
+
+	/// <summary>
+	/// Retrieves all messages from a specific channel, excluding messages marked as deleted for the requesting user.
+	/// </summary>
+	/// <param name="channelId">The ID of the channel to retrieve messages from.</param>
+	/// <param name="userId">The ID of the user requesting the messages (used to filter deleted-for-me records).</param>
+	/// <returns>Returns a collection of Message objects ordered by send time (newest first).</returns>
 	public async Task<IEnumerable<Message>> GetMessagesAsync(Guid channelId,Guid userId) {
 		return await this._db.Messages
 			.Where(m => m.ChannelId == channelId && !this._db.DeletedForMeRecords.Any(r => r.UserId == userId && r.MessageId == m.Id))
@@ -68,6 +108,12 @@ public class MessageService(
 			})
 			.ToListAsync();
 	}
+
+	/// <summary>
+	/// Retrieves all message channels that a user is a member of.
+	/// </summary>
+	/// <param name="userId">The ID of the user to retrieve channels for.</param>
+	/// <returns>Returns a collection of MessageChannel objects with their members populated.</returns>
 	public async Task<IEnumerable<MessageChannel>> GetAllChannelsAsync(Guid userId) {
 		var channels = await this._db.Channels
 			.Where(c => this._db.ChannelMembers.Any(m => m.ChannelId == c.Id && m.UserId == userId))
@@ -79,9 +125,22 @@ public class MessageService(
 		}
 		return channels;
 	}
+
+	/// <summary>
+	/// Checks if a message channel exists in the database.
+	/// </summary>
+	/// <param name="channelId">The ID of the channel to check.</param>
+	/// <returns>Returns true if the channel exists; otherwise returns false.</returns>
 	public async Task<bool> ChannelExistsAsync(Guid channelId) {
 		return (await this._db.Channels.FirstOrDefaultAsync(c => c.Id == channelId)) is not null;
 	}
+
+	/// <summary>
+	/// Permanently deletes a message from a channel.
+	/// Notifies all channel members of the deletion via SignalR and logs the action.
+	/// </summary>
+	/// <param name="messageId">The ID of the message to delete.</param>
+	/// <exception cref="InvalidOperationException">Thrown when the message ID does not exist.</exception>
 	public async Task DeleteMessageAsync(Guid messageId) {
 		var message = await this._db.Messages.FirstOrDefaultAsync(m => m.Id == messageId)
 			?? throw new InvalidOperationException($"No message with id {messageId}");
@@ -92,6 +151,13 @@ public class MessageService(
 			.SendAsync("MessageDeleted",message);
 		await this._logService.LogMessageDeletionAsync(message);
 	}
+
+	/// <summary>
+	/// Marks a message as deleted for a specific user only, keeping it visible to others.
+	/// </summary>
+	/// <param name="messageId">The ID of the message to delete.</param>
+	/// <param name="userId">The ID of the user for whom to delete the message.</param>
+	/// <exception cref="InvalidOperationException">Thrown when the message ID or user ID does not exist.</exception>
 	public async Task DeleteForMeAsync(Guid messageId,Guid userId) {
 		var message = await this._db.Messages.FirstOrDefaultAsync(m => m.Id == messageId)
 			?? throw new InvalidOperationException($"No message with id {messageId}");
@@ -100,6 +166,14 @@ public class MessageService(
 		this._db.DeletedForMeRecords.Add(new DeletedForMeRecord(messageId,userId));
 		await this._db.SaveChangesAsync();
 	}
+
+	/// <summary>
+	/// Updates the typing state of a user in a specific channel and broadcasts it to all channel members via SignalR.
+	/// </summary>
+	/// <param name="userId">The ID of the user whose typing state is being updated.</param>
+	/// <param name="channelId">The ID of the channel where the typing state is being updated.</param>
+	/// <param name="state">True if the user is typing, false otherwise.</param>
+	/// <exception cref="InvalidOperationException">Thrown when the user ID or channel ID does not exist.</exception>
 	public async Task UpdateUserTypingStateAsync(Guid userId,Guid channelId,bool state) {
 		var user = await this._userService.GetUserFromGuidAsync(userId) ?? throw new InvalidOperationException($"No user with id {userId}");
 		var channel = await this.GetChannelAsync(channelId) ?? throw new InvalidOperationException($"No channel with id {channelId}");
@@ -107,6 +181,11 @@ public class MessageService(
 			.Group(channel.Id.ToString())
 			.SendAsync("TypingStateUpdate",user,state);
 	}
+
+	/// <summary>
+	/// Internal method that processes queued messages by storing them in the database and broadcasting them to channel members.
+	/// Called to flush messages from the queue and persist them with audit logging.
+	/// </summary>
 	internal async Task processQueueAsync() {
 		await foreach (var message in this._queueService.DequeueAllAsync()) {
 			var channel = await this._db.Channels.FirstOrDefaultAsync(c => c.Id == message.ChannelId);
